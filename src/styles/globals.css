@@ -1,0 +1,49 @@
+/* ===== Paginador (corrige layout) ===== */
+.paginator{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;   /* o space-between si quieres info a la izq */
+  gap:12px;
+  margin-top:12px;
+}
+
+.paginator-info{ opacity:.8; }
+
+.paginator-size{
+  background:#0f1523;
+  color:#e8ecf3;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:8px;
+  padding:6px 8px;
+}
+
+/* Contenedor de botones de navegación */
+.paginator-nav{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+/* IMPORTANT: que los botones del paginador no se estiren */
+.paginator .btn{
+  display:inline-flex;        /* no block */
+  width:auto;                 /* no 100% */
+  min-width:32px;
+  height:32px;
+  padding:0 10px;
+  border-radius:8px;
+  box-shadow:none;            /* evita sombras grandes si las tienes globales */
+  align-items:center;
+  justify-content:center;
+}
+
+.paginator-page{
+  min-width:72px;
+  text-align:center;
+  opacity:.9;
+}
+
+.paginator .btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}

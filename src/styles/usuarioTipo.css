@@ -1,0 +1,139 @@
+/* Reusa la tabla del usuarios.css */
+.table-wrap {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  overflow: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.table thead th {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.03);
+  text-align: left;
+  font-weight: 600;
+  padding: 12px;
+}
+.table tbody td {
+  padding: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Header con botón nuevo */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.btn:hover {
+  background: #1d4ed8;
+}
+
+/* Botones de acción en tabla */
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin: 0 4px;
+  font-size: 16px;
+  opacity: 0.8;
+}
+.action-btn:hover {
+  opacity: 1;
+}
+
+/* Fondo más oscuro y con blur */
+.modal-backdrop{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.7);
+  backdrop-filter:saturate(120%) blur(2px);
+  display:flex; align-items:center; justify-content:center;
+  padding:16px; z-index:100;
+}
+
+/* Modal más grande y con mejor sombra */
+.modal-card{
+  width:min(700px, 92vw);           /* ← más ancho (antes 320–520) */
+  background:#161b2a;
+  color:#e8ecf3;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+  overflow:hidden;
+}
+
+.modal-title{ margin:0; padding:18px 20px; font-size:20px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.modal-body{ padding:18px 20px; }
+.modal-footer{
+  display:flex; justify-content:flex-end; gap:10px;   /* ← botones lado a lado */
+  padding:12px 20px; border-top:1px solid rgba(255,255,255,.08);
+}
+
+/* Formulario más cómodo */
+.form{ display:flex; flex-direction:column; gap:14px; }
+.form-row{ display:flex; flex-direction:column; gap:6px; }
+.form-row input, .form-row textarea, .form-row select{
+  width:100%;
+  background:#0f1523; color:#e8ecf3;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px; padding:10px 12px; outline:none;
+}
+.form-row input:focus, .form-row textarea:focus, .form-row select:focus{
+  border-color:#3b82f6;
+}
+
+/* Botones genéricos */
+.btn{ background:rgba(255,255,255,.08); color:#e8ecf3;
+  border:none; border-radius:10px; padding:10px 14px; cursor:pointer;
+}
+.btn:hover{ background:rgba(255,255,255,.14); }
+.btn.primary{ background:#3b82f6; }
+.btn.primary:hover{ filter:brightness(1.05); }
+
+/* Botón “Nuevo” más pequeño (solo en el header de la página) */
+.header-row .btn.primary{ padding:8px 12px; font-size:14px; }  /* ← más chico */
+.header-row {
+  display: flex;
+  justify-content: center; /* centra el título */
+  align-items: center;
+  margin-bottom: 16px;
+  position: relative; /* para colocar el botón */
+}
+
+.header-row .btn.small {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  width: auto; /* evita que se estire */
+}
+
+.page-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+}

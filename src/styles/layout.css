@@ -1,0 +1,68 @@
+:root { --bg:#0f1523; --panel:#161b2a; --text:#e8ecf3; --muted:#a6b0c3; --accent:#3b82f6; }
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+
+.app-shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.sidebar{background:var(--panel);padding:20px;display:flex;flex-direction:column;gap:16px;border-right:1px solid rgba(255,255,255,.06)}
+.brand{font-weight:800;font-size:20px;letter-spacing:.5px}
+.nav{display:flex;flex-direction:column;gap:8px}
+.link{padding:10px 12px;border-radius:10px;color:var(--muted);text-decoration:none}
+.link:hover{background:rgba(255,255,255,.06);color:var(--text)}
+.link.active{background:rgba(59,130,246,.15);color:var(--text);outline:1px solid rgba(59,130,246,.35)}
+.spacer{flex:1}
+.logout{background:#dc2626;border:none;color:white;padding:10px 12px;border-radius:10px;cursor:pointer}
+.logout:hover{filter:brightness(1.1)}
+
+.app-content{padding:24px}
+@media (max-width: 920px){
+  .app-shell{grid-template-columns:1fr}
+  .sidebar{position:sticky;top:0;z-index:10;flex-direction:row;align-items:center;gap:12px}
+  .nav{flex-direction:row;gap:12px}
+  .spacer{display:none}
+}
+/* padre con botón */
+.link-parent {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* chevron */
+.chev { transition: transform .2s ease; }
+.chev.open { transform: rotate(180deg); }
+
+/* contenedor del submenú */
+.submenu {
+  margin-left: 8px;
+  padding-left: 10px;
+  border-left: 1px dashed rgba(255,255,255,.12);
+
+  /* animación de apertura */
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .25s ease;
+}
+.submenu.open { max-height: 400px; } /* ajusta según número de items */
+
+/* links del submenú */
+.sublink {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--muted);
+  text-decoration: none;
+  margin: 2px 0;
+}
+.sublink:hover { background: rgba(255,255,255,.06); color: var(--text); }
+.sublink.active { background: rgba(59,130,246,.15); color: var(--text); outline: 1px solid rgba(59,130,246,.35); }
+
+/* opcional: espaciado visual del grupo */
+.menu-item { display: grid; gap: 6px; }
+
