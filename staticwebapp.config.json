@@ -1,11 +1,14 @@
 {
-  "mimeTypes": {
-    ".js": "text/javascript",
-    ".mjs": "text/javascript",
-    ".ts": "text/javascript",
-    ".tsx": "text/javascript"
-  },
-  "routes": [
-    { "route": "/*", "rewrite": "/index.html" }
-  ]
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/assets/*",
+      "/*.css",
+      "/*.js",
+      "/images/*",
+      "/favicon.ico",
+      "/robots.txt",
+      "/vite.svg"
+    ]
+  }
 }
