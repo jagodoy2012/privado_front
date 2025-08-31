@@ -27,21 +27,11 @@ export default function Login() {
           onChange={setContrasena}
           onToggleShow={() => setShowPwd(v => !v)}
         />
-        <RememberForgot
-          remember={remember}
-          onToggle={setRemember}
-          onForgot={() => alert('Implementa flujo de recuperación.')}
-        />
-
+       
         <SubmitButton loading={loading} />
         <Messages error={err} ok={ok} />
 
-        <p className="small">
-          ¿No tienes cuenta?{' '}
-          <a className="link" href="#" onClick={(e) => e.preventDefault()}>
-            Regístrate
-          </a>
-        </p>
+       
       </form>
     </main>
   );

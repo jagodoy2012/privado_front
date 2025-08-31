@@ -34,8 +34,20 @@ export function useLogin() {
       });
 
       // guarda token
-      if (remember) localStorage.setItem('token', data.token);
-      else sessionStorage.setItem('token', data.token);
+      if (remember) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('id_usuario_tipo',data.idUsuarioTipo.toString());
+        localStorage.setItem('id_usuario',data.id.toString());
+        localStorage.setItem('nombreCompleto',data.nombres+" "+data.apellidos.toString());
+        
+      }
+      else {
+        localStorage.setItem('id_usuario_tipo',data.idUsuarioTipo.toString());
+        sessionStorage.setItem('token', data.token);
+        localStorage.setItem('id_usuario',data.id.toString());
+        localStorage.setItem('nombreCompleto',data.nombres+" "+data.apellidos.toString());
+
+      }
 
       // setea Authorization para próximas llamadas
       api.defaults.headers.common.Authorization = `Bearer ${data.token}`;
