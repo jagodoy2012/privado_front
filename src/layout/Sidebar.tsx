@@ -75,7 +75,15 @@ export default function Sidebar() {
 
   function logout() {
     localStorage.removeItem('token');
+        localStorage.removeItem('id_usuario_tipo');
+    localStorage.removeItem('id_usuario');
+    localStorage.removeItem('nombreCompleto');
+
     sessionStorage.removeItem('token');
+        sessionStorage.removeItem('id_usuario_tipo');
+    sessionStorage.removeItem('id_usuario');
+    sessionStorage.removeItem('nombreCompleto');
+
     delete api.defaults.headers.common.Authorization;
     navigate('/login', { replace: true });
   }

@@ -41,15 +41,9 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       >
+        
         {/* / -> Dashboard */}
-        <Route index element={(() => {
-        const paginaInicio = localStorage.getItem("id_usuario_tipo"); 
-        if (paginaInicio === "2") {
-          return <Usuarios />;
-        } else {
-          return <Usuarios />; // default
-        }
-      })()} />
+
         {/* /usuarios -> página de usuarios */} 
         <Route path="usuarios" element={<Usuarios />} />
           <Route path="tipos" element={<UsuarioTipo />} /> 

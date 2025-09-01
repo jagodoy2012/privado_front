@@ -48,15 +48,22 @@ export function useLogin() {
         localStorage.setItem('nombreCompleto',data.nombres+" "+data.apellidos.toString());
 
       }
-
       // setea Authorization para próximas llamadas
       api.defaults.headers.common.Authorization = `Bearer ${data.token}`;
 
       setOk(`¡Bienvenido, ${data.nombres}!`);
 
       // redirige al destino original o al dashboard
-      const to = (location.state as any)?.from?.pathname ?? '/';
+      if(data.idUsuarioTipo.toString()=="2"){
+      const to = (location.state as any)?.from?.pathname ?? '/reporte';
       navigate(to, { replace: true });
+
+      }
+      else{
+              const to = (location.state as any)?.from?.pathname ?? '/usuarios';
+      navigate(to, { replace: true });
+
+      }
     } catch (e: any) {
       setErr(e.message || 'Error desconocido al iniciar sesión.');
     } finally {
