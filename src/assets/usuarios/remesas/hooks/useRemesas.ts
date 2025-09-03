@@ -1,10 +1,11 @@
+// src/pages/banca/remesas/hooks/useRemesas.ts
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../../../../lib/api';
 import type { Cuenta, CuentaRaw, MonedaLite, NuevaTransaccion } from '../../cuentas/interfaces/cuenta';
 import type { Remesa, RemesaNuevaEnvio, RemesaCobro, RemesaLiteByNoPago } from '../interfaces/remesa';
 
 /* ======== Ajustes de negocio ======== */
-const PRODUCTO_CUENTA_DEFAULT = 3;
+const PRODUCTO_CUENTA_DEFAULT = 2;
 export const DESTINO_TRANSACCION_REMESAS = 0; // reemplaza por ID real si existe
 
 /* =============== Endpoints =============== */
@@ -20,8 +21,8 @@ const TRANSACCIONES_CRUD = `/api/transacciones`;
 const ASIGNADOS_BY_PRODUCTO = (idProducto: number) =>
   `/api/PRODUCTO_BANCARIO_TIPO_ASIGNADO/by-producto/${idProducto}`;
 
-
-const CUENTAS_FIND_PATH = `/api/producto_bancario_usuario/find`;
+const CUENTAS_FIND_BY_PROD_ASIGNADO = (idProdAsignado: number, idUsuario: number) =>
+  `/api/producto_bancario_usuario/find?id_producto_bancario_asignado=${idProdAsignado}&id_usuario_producto=${idUsuario}`;
 
 const CUENTA_BY_ID  = (id: number) => `/api/producto_bancario_usuario/${id}`;
 const CUENTA_UPDATE = (id: number) => `/api/producto_bancario_usuario/${id}`;
@@ -72,9 +73,32 @@ export function useRemesas() {
     }
   }, [idUsuario]);
 
+  const loadCuentas = useCallback(async () => {
+    try {
+      const asg = await api.get<Array<{ id:number }>>(ASIGNADOS_BY_PRODUCTO(PRODUCTO_CUENTA_DEFAULT),
+        { headers: { Accept: 'application/json, text/plain, */*' } });
+      const asignados = (asg.data ?? []).map(a => a.id);
 
+      const reqs = asignados.map(async idAsig => {
+        try {
+          const r = await api.get<Cuenta[]>(
+            CUENTAS_FIND_BY_PROD_ASIGNADO(idAsig, idUsuario),
+            { headers: { Accept: 'application/json, text/plain, */*' } }
+          );
+          return r.data ?? [];
+        } catch { return []; }
+      });
+
+      const matrices = await Promise.all(reqs);
+      const lista = Array.from(new Map(matrices.flat().map(c => [c.id, c as Cuenta])).values());
+      setCuentas(lista);
+    } catch {
+      setCuentas([]);
+    }
+  }, [idUsuario]);
 
   useEffect(() => { loadRemesas(); }, [loadRemesas]);
+  useEffect(() => { loadCuentas(); }, [loadCuentas]);
 
   /* ===== utilidades de moneda ===== */
   const monedaIdx = useMemo(() => new Map(monedas.map(m => [m.id, m] as const)), [monedas]);
@@ -90,28 +114,21 @@ export function useRemesas() {
     const to   = toIsoCode(destino);
 
     const tpl = tcApis.find(x => (x.url || '').toUpperCase().includes(`TO=${to}`));
+   
+
+
     if (!tpl) throw new Error('No hay URL de tipo de cambio configurada para destino ' + to);
 
     const url = (tpl.url || '')
       .replace('{monedaCambio}', from)
       .replace('{moneda}', from)
       .replace('{moneda_cambio}', from);
+      console.log("URL__:::__",url);
 
     const { data } = await api.get(url, { headers: { Accept: 'application/json, text/plain, */*' } });
     const rate = data?.result?.[to];
     if (!rate || Number.isNaN(rate)) throw new Error('Tipo de cambio no disponible');
     return monto * rate;
-  }
-
-  /* === Identificar GTQ y helper para convertir a GTQ === */
-  const gtqId = useMemo(() => {
-    const m = monedas.find(mm => toIsoCode(mm) === 'GTQ' || (mm?.simbolo || '').toUpperCase() === 'Q');
-    return m?.id ?? null;
-  }, [monedas]);
-
-  async function aGTQ(origenId: number, monto: number): Promise<number> {
-    if (!gtqId) return monto;
-    return convertirMonto(origenId, gtqId, monto);
   }
 
   /* ===== actualizar saldos ===== */
@@ -141,25 +158,28 @@ export function useRemesas() {
 
   // crear envío con no_pago + fecha_envio
   const crearRemesaEnvio = useCallback(async (payload: RemesaNuevaEnvio) => {
-    const d = new Date();
-    const pad = (n:number) => String(n).padStart(2, '0');
-    const fechaDateTime = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}` +
-      `T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}Z`;
-
+  
+     const d = new Date();
+  const pad = (n:number) => String(n).padStart(2, '0');
+  const fechaDateTime = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}` +
+  `T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}Z`;
     const payloadFecha = {
-      ...payload,
-      fecha_envio: fechaDateTime,
-      fecha: fechaDateTime,
-      nombre_remitente: localStorage.getItem('nombreCompleto')
-    };
+    ...payload,
+    fecha_envio: fechaDateTime,   // 👈 ya con formato datetime
+    fecha: fechaDateTime,
+    nombre_remitente: localStorage.getItem('nombreCompleto')
 
+  };
+
+    console.log("REMESAS___",payloadFecha);
     await api.post(REMESAS_CRUD, payloadFecha, { headers: { Accept: 'application/json, text/plain, */*' } });
     await loadRemesas();
   }, [loadRemesas]);
 
-  // PUT: marcar cobrada (solo id_usuario)
+  // PUT: marcar cobrada (solo id_usuario), sin nullear demás columnas
   const cobrarRemesa = useCallback(
     async (payload: RemesaCobro) => {
+      // 1) Buscar por no_pago
       const { data } = await api.get<RemesaLiteByNoPago[]>(
         REMESAS_BY_NOPAGO(payload.no_pago),
         { headers: { Accept: 'application/json, text/plain, */*' } }
@@ -171,13 +191,18 @@ export function useRemesas() {
 
       const idUsuarioActual = Number(localStorage.getItem('id_usuario') ?? 0);
 
+      // 2) Intentar traer la fila completa para no sobreescribir con null
       let current: any;
       try {
+
         const { data: full } = await api.get<any>(REMESA_BY_ID(info.id), {
           headers: { Accept: 'application/json, text/plain, */*' },
         });
+
+
         current = full;
       } catch {
+        // fallback: compón lo mejor posible con lo que tienes
         current = {
           id: info.id,
           no_pago: info.no_pago,
@@ -192,12 +217,14 @@ export function useRemesas() {
         };
       }
 
+      // 3) PUT con spread, modificando SOLO id_usuario
       const body = { ...current, id_usuario: idUsuarioActual };
 
       await api.put(`${REMESAS_CRUD}/${info.id}`, body, {
         headers: { Accept: 'application/json, text/plain, */*', 'Content-Type': 'application/json' },
       });
 
+      // 4) refrescar
       await loadRemesas();
     },
     [loadRemesas]
@@ -213,23 +240,36 @@ export function useRemesas() {
     return (data ?? [])[0] ?? null;
   }, []);
 
-  /* ===== transacciones (registro contable) ===== */
-  const registrarTransaccion = useCallback(async (t: NuevaTransaccion) => {
-    const d = new Date();
-    const pad = (n:number) => String(n).padStart(2, '0');
-    const fechaDateTime = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}` +
-      `T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}Z`;
+ /* ===== transacciones (registro contable) ===== */
+const registrarTransaccion = useCallback(async (t: NuevaTransaccion) => {
+  // Forzamos fecha_realizado a datetime antes de enviar
+  const d = new Date();
+  const pad = (n:number) => String(n).padStart(2, '0');
+  const fechaDateTime = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}` +
+  `T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}Z`;
+  console.log("OBJETO TRANSACCIONES_____", t);
 
-    const payload = {
-      ...t,
-      fecha_realizado: fechaDateTime,
-      fecha: fechaDateTime,
-    };
 
-    await api.post(TRANSACCIONES_CRUD, payload, {
-      headers: { Accept: 'application/json, text/plain, */*' }
-    });
-  }, []);
+  const payload = {
+    ...t,
+    fecha_realizado: fechaDateTime,   // 👈 ya con formato datetime
+    fecha: fechaDateTime,
+  };
+
+  payload.fecha=payload.fecha_realizado;
+  if(payload.id_producto_bancario_usuario_recibe=0){
+  payload.id_producto_bancario_usuario_recibe = 15;
+  }
+  if(payload.id_producto_bancario_usuario_envia=0){
+      payload.id_producto_bancario_usuario_envia = 15;
+
+  }
+    console.log("OBJETO TRANSACCIONES_____", payload);
+
+  await api.post(TRANSACCIONES_CRUD, payload, {
+    headers: { Accept: 'application/json, text/plain, */*' }
+  });
+}, []);
 
   return {
     // datos
@@ -240,8 +280,6 @@ export function useRemesas() {
 
     // utilidades
     convertirMonto,
-    gtqId,      // <-- nuevo
-    aGTQ,       // <-- nuevo
 
     // saldos
     debitarSaldo, acreditarSaldo,

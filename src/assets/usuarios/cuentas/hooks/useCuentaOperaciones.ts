@@ -19,7 +19,7 @@ const OPERACION_BY_ID = (id: number) => `/api/operaciones/${id}`;
 const TRANSACCIONES_BY_CUENTA = (idCuenta: number) => `/api/transacciones/by-cuenta/${idCuenta}`;
 const TRANSACCIONES_CRUD = `/api/transacciones`;
 const TERCEROS_CRUD = `/api/cuentaterceros`;
-const TERCEROS_CRUDB = `/api/cuentaterceros/buscar?id_usuario_prim=${idUsuario}`;
+const TERCEROS_CRUDB = `/api/cuentaterceros/buscar?id_usuario_prim= ${idUsuario}`;
 
 const CUENTA_BY_ID = (id: number) => `/api/producto_bancario_usuario/${id}`;
 const CUENTA_UPDATE = (id: number) => `/api/producto_bancario_usuario/${id}`;
@@ -234,6 +234,10 @@ export function useCuentaOperaciones(idCuentaInicial: number | null, idProductoB
 
   /* ================= Acciones ================= */
   const crearTransaccion = useCallback(async (payload: NuevaTransaccion) => {
+    payload.fecha=payload.fecha_realizado;
+    console.log("Tean:",TRANSACCIONES_CRUD);
+    console.log("Tean:",payload);
+    
     await api.post(TRANSACCIONES_CRUD, payload, { headers: { Accept: 'application/json, text/plain, */*' } });
     const idCuenta = payload.id_producto_bancario_usuario_envia;
     const [tr, cR] = await Promise.all([

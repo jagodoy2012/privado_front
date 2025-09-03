@@ -55,12 +55,12 @@ export function useLogin() {
 
       // redirige al destino original o al dashboard
       if(data.idUsuarioTipo.toString()=="2"){
-      const to = (location.state as any)?.from?.pathname ?? '/reporte';
+      const to = (location.state as any)?.from?.pathname ?? '/ventasAdmin' ;
       navigate(to, { replace: true });
 
       }
       else{
-              const to = (location.state as any)?.from?.pathname ?? '/usuarios';
+              const to = (location.state as any)?.from?.pathname ?? '/comprasAdmin';
       navigate(to, { replace: true });
 
       }

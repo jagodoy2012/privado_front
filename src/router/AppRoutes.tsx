@@ -25,6 +25,8 @@ import CuentaOperacionesPage from '../assets/usuarios/cuentas/pages/CuentaOperac
 import TarjetaPagosPage from '../assets/usuarios/tarjetas/pages/TarjetaPagosPage';
 import RemesasPage from '../assets/usuarios/remesas/pages/RemesasPage';
 import ReporteCuentaPage from '../assets/usuarios/historicos/pages/ReporteCuentaPage';
+import FacturacionPage from '../adminSistemas/usuario/ventas';
+import InventariosPage from '../adminSistemas/usuario/inventario';
 
 export default function AppRoutes() {
   return (
@@ -65,6 +67,8 @@ export default function AppRoutes() {
             <Route path="tarjetaPagos" element={<TarjetaPagosPage />} /> 
             <Route path="remesaUsuario" element={<RemesasPage />} /> 
             <Route path="reporte" element={<ReporteCuentaPage />} /> 
+            <Route path="ventasAdmin" element={<FacturacionPage />} /> 
+            <Route path="comprasAdmin" element={<InventariosPage />} /> 
 
             
 

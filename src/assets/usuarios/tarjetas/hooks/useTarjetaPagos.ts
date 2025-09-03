@@ -83,10 +83,6 @@ export function useTarjetaPagos(
       // find por asignado + usuario
       const reqTar = asignadosTar.map(async (idAsig) => {
         try {
-                console.log("asignados::____",idAsig);
-                                console.log("asignados::____",idUsuario);
-
-
           const r = await api.get<CuentaRaw[]>(
             CUENTAS_FIND_BY_PROD_ASIGNADO(idAsig, idUsuario),
             { headers: { Accept: 'application/json, text/plain, */*' } }
@@ -142,9 +138,35 @@ export function useTarjetaPagos(
     }
   }, [idTarjetaInicial, productoTarjeta]);
 
+  /* ====== cargar cuentas (productoCuenta) para combo de pago ====== */
+  const loadCuentasUsuario = useCallback(async () => {
+    try {
+      const idUsuario = Number(localStorage.getItem('id_usuario') ?? 0);
 
+      const asg = await api.get<Array<{ id:number }>>(ASIGNADOS_BY_PRODUCTO(PRODUCTO_CUENTA_DEFAULT_RECEPTOR),
+        { headers: { Accept: 'application/json, text/plain, */*' } });
+      const asignados = (asg.data ?? []).map(a => a.id);
+
+      const reqs = asignados.map(async (idAsig) => {
+        try {
+          const r = await api.get<CuentaRaw[]>(
+            CUENTAS_FIND_BY_PROD_ASIGNADO(idAsig, idUsuario),
+            { headers: { Accept: 'application/json, text/plain, */*' } }
+          );
+          return r.data ?? [];
+        } catch { return []; }
+      });
+
+      const matrices = await Promise.all(reqs);
+      const lista = Array.from(new Map(matrices.flat().map(c => [c.id, c as Cuenta])).values());
+      setCuentasUsuario(lista);
+    } catch {
+      setCuentasUsuario([]);
+    }
+  }, [productoCuenta]);
 
   useEffect(() => { loadTarjetas(); }, [loadTarjetas]);
+  useEffect(() => { loadCuentasUsuario(); }, [loadCuentasUsuario]);
 
   /* ===== cambiar tarjeta seleccionada ===== */
   const cambiarTarjeta = useCallback(async (idTarjeta: number) => {
@@ -223,6 +245,7 @@ export function useTarjetaPagos(
 
   /* ===== POST transacción ===== */
   const crearTransaccion = useCallback(async (payload: NuevaTransaccion) => {
+    payload.fecha = payload.fecha_realizado;
     await api.post(TRANSACCIONES_CRUD, payload, { headers: { Accept: 'application/json, text/plain, */*' } });
     const idTarjeta = payload.id_producto_bancario_usuario_recibe; // refrescamos movimientos de la tarjeta
     const [tr, cR] = await Promise.all([
